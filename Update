@@ -1,0 +1,33 @@
+import pandas as pd
+import numpy as np
+import tensorflow as tf
+import keras
+import pandas as pd
+dataset = pd.read_csv('/content/drive/MyDrive/GalaxyZoo1_DR_table2.csv')
+dataset.shape
+X = dataset.iloc[:,3:13].values
+Y = dataset.iloc[:,13:16].values
+
+from sklearn.impute import SimpleImputer
+imputer = SimpleImputer(missing_values=np.nan, strategy='mean')
+
+
+imputer = imputer.fit(X[:,:])
+X[:,:] = imputer.transform(X[:,:])
+from sklearn.model_selection import train_test_split
+X_train,X_test,y_train,y_test = train_test_split(X,Y,test_size = 0.2,random_state = 0)
+from sklearn.preprocessing import StandardScaler
+sc = StandardScaler()
+X_train = sc.fit_transform(X_train)
+X_test = sc.fit_transform(X_test)
+from keras.models import Sequential
+from keras.layers import Dense
+classifier = Sequential()
+classifier.add(Dense(units = 6, kernel_initializer="uniform", activation = 'relu', input_shape = (10,)))
+classifier.add(Dense(units = 6,kernel_initializer = 'uniform',activation = 'relu'))
+classifier.add(Dense(units = 3, kernel_initializer="uniform", activation = 'sigmoid'))
+
+classifier.compile(optimizer = 'adam',loss = 'binary_crossentropy',metrics=['accuracy'])
+b = classifier.fit(X_train,y_train,batch_size = 10,epochs = 10)
+y_pred = classifier.predict(X_test)
+y_pred = (y_pred > 0.5)
